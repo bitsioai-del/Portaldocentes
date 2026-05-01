@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompts Gemini para Docentes | Inteligencia Educativa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #2c3e50;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* HEADER */
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .character-avatar {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #555;
+            margin-top: 10px;
+        }
+
+        /* SEARCH & FILTER */
+        .search-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+            margin-bottom: 40px;
+            animation: fadeIn 1s ease-out 0.2s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .search-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-wrapper input {
+            width: 100%;
+            padding: 15px 20px;
+            padding-left: 50px;
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fb;
+        }
+
+        .search-wrapper input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            color: #999;
+        }
+
+        .category-filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #e0e6ed;
+            background: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .filter-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* GRID DE PROMPTS */
+        .prompts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            animation: fadeIn 1s ease-out 0.4s both;
+        }
+
+        .prompt-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            border: 1px solid #e8eef5;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prompt-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .prompt-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .prompt-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .prompt-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .prompt-emoji {
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .prompt-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2c3e50;
+            line-height: 1.3;
+        }
+
+        .category-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            margin-top: 8px;
+        }
+
+        .prompt-text {
+            background: #f8f9fb;
+            padding: 12px;
+            border-left: 3px solid #667eea;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .prompt-text::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .prompt-text::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .prompt-text::-webkit-scrollbar-thumb {
+            background: #ddd;
+            border-radius: 2px;
+        }
+
+        .copy-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .copy-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .copy-btn:active {
+            transform: scale(0.98);
+        }
+
+        .copy-btn.copied {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        /* STATS */
+        .stats {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #999;
+            margin-top: 30px;
+        }
+
+        /* PERSONAJES - SIDEBAR */
+        .characters-info {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 40px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+            animation: fadeIn 1s ease-out 0.6s both;
+        }
+
+        .characters-info h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .characters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .character {
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .character:hover {
+            transform: scale(1.05);
+        }
+
+        .character-large {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+
+        .character-name {
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .character-desc {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* PERSONAJE FLOTANTE */
+        .floating-character {
+            position: fixed;
+            right: 30px;
+            bottom: 100px;
+            pointer-events: auto;
+            z-index: 999;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            animation: float 3s ease-in-out infinite;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .floating-character.hidden {
+            opacity: 0;
+            transform: translateY(50px) scale(0.8);
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                transform: translateY(-20px) scale(1);
+            }
+        }
+
+        .character-bubble {
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 70px;
+            box-shadow: 0 15px 50px rgba(102, 126, 234, 0.4);
+            border: 4px solid white;
+            position: relative;
+        }
+
+        .character-bubble::after {
+            content: '✓';
+            position: absolute;
+            bottom: 0px;
+            right: 0px;
+            width: 35px;
+            height: 35px;
+            background: #11998e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            border: 3px solid white;
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        /* Personaje se esconde en móviles pequeños */
+        @media (max-width: 480px) {
+            .floating-character {
+                right: 10px;
+                bottom: 60px;
+            }
+
+            .character-bubble {
+                width: 90px;
+                height: 90px;
+                font-size: 45px;
+                border: 3px solid white;
+            }
+
+            .character-bubble::after {
+                width: 28px;
+                height: 28px;
+                font-size: 16px;
+                border: 2px solid white;
+            }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .prompts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-section {
+                padding: 20px;
+            }
+
+            .character-avatar {
+                width: 60px;
+                height: 60px;
+                font-size: 30px;
+            }
+        }
+
+        /* LOADING ANIMATION */
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+            font-size: 1.1rem;
+        }
+
+        .no-results-emoji {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- PERSONAJE FLOTANTE -->
+    <div id="floatingCharacter" class="floating-character">
+        <div class="character-bubble">🧠</div>
+    </div>
+
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <div class="header-content">
+                <div class="character-avatar">🎓</div>
+                <div>
+                    <h1>Prompts Gemini para Docentes</h1>
+                    <p class="subtitle">100 prompts inteligentes para potenciar tu enseñanza con IA</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- SEARCH & FILTER -->
+        <section class="search-section">
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Busca un prompt... (ej: evaluación, creatividad, TIC)">
+            </div>
+            <div class="category-filters">
+                <button class="filter-btn active" data-category="todos">Todos</button>
+                <button class="filter-btn" data-category="planificacion">Planificación</button>
+                <button class="filter-btn" data-category="evaluacion">Evaluación</button>
+                <button class="filter-btn" data-category="contenido">Contenido</button>
+                <button class="filter-btn" data-category="creatividad">Creatividad</button>
+                <button class="filter-btn" data-category="tic">TIC & Recursos</button>
+                <button class="filter-btn" data-category="motivacion">Motivación</button>
+            </div>
+        </section>
+
+        <!-- GRID DE PROMPTS -->
+        <section class="prompts-grid" id="promptsGrid"></section>
+
+        <!-- STATS -->
+        <div class="stats">
+            <p id="statsText">Cargando prompts...</p>
+        </div>
+
+        <!-- PERSONAJES -->
+        <section class="characters-info">
+            <h2>Nuestros Guías Educativos</h2>
+            <div class="characters-grid">
+                <div class="character">
+                    <div class="character-large">👨‍🏫</div>
+                    <div class="character-name">Maestro Inteligente</div>
+                    <div class="character-desc">Especialista en planificación y metodología educativa</div>
+                </div>
+                <div class="character">
+                    <div class="character-large">👩‍💻</div>
+                    <div class="character-name">Mentora TIC</div>
+                    <div class="character-desc">Experta en tecnología y recursos digitales</div>
+                </div>
+                <div class="character">
+                    <div class="character-large">🎨</div>
+                    <div class="character-name">Coach Creativo</div>
+                    <div class="character-desc">Impulsa la innovación y pensamiento crítico</div>
+                </div>
+                <div class="character">
+                    <div class="character-large">📊</div>
+                    <div class="character-name">Evaluador Estratégico</div>
+                    <div class="character-desc">Propone formas inteligentes de medir aprendizaje</div>
+                </div>
+                <div class="character">
+                    <div class="character-large">💪</div>
+                    <div class="character-name">Motivador Experto</div>
+                    <div class="character-desc">Inspira y mantiene el entusiasmo en clase</div>
+                </div>
+                <div class="character">
+                    <div class="character-large">🌟</div>
+                    <div class="character-name">Facilitador de Inclusión</div>
+                    <div class="character-desc">Asegura aprendizaje para todos los estudiantes</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // BASE DE DATOS DE 100 PROMPTS
+        const prompts = [
+            // PLANIFICACIÓN (20)
+            { title: "Diseña una unidad didáctica", text: "Diseña una unidad didáctica de [TEMA] para [NIVEL] que incluya objetivos, contenidos, metodología activa y evaluación formativa.", category: "planificacion", emoji: "📐" },
+            { title: "Crea un cronograma semanal", text: "Crea un cronograma semanal para enseñar [TEMA] a [NIVEL], distribuyendo el tiempo según la complejidad de contenidos.", category: "planificacion", emoji: "📅" },
+            { title: "Planifica una clase interactiva", text: "Planifica una clase de 90 minutos sobre [TEMA] que incluya actividad de inicio, desarrollo interactivo y cierre reflexivo.", category: "planificacion", emoji: "🎯" },
+            { title: "Alineación de objetivos", text: "Alinea los objetivos de aprendizaje con [TEMA], competencias clave y criterios de evaluación para [NIVEL].", category: "planificacion", emoji: "🎲" },
+            { title: "Identifica preconceptos", text: "¿Cuáles son los preconceptos más comunes sobre [TEMA] en estudiantes de [NIVEL]? ¿Cómo abordarlos?", category: "planificacion", emoji: "🧠" },
+            { title: "Secuencia didáctica", text: "Crea una secuencia didáctica de [NÚMERO] sesiones para introducir [TEMA] de forma progresiva a [NIVEL].", category: "planificacion", emoji: "📊" },
+            { title: "Adaptación curricular", text: "Propón adaptaciones curriculares significativas para [TEMA] dirigidas a estudiantes con [NECESIDAD ESPECÍFICA].", category: "planificacion", emoji: "♿" },
+            { title: "Rúbrica de evaluación", text: "Crea una rúbrica de evaluación detallada (4 niveles) para evaluar [COMPETENCIA] en [NIVEL].", category: "planificacion", emoji: "✅" },
+            { title: "Integración interdisciplinar", text: "¿Cómo integrar [TEMA] de forma interdisciplinar con [OTRAS ÁREAS]? Proporciona una actividad conjunta.", category: "planificacion", emoji: "🔗" },
+            { title: "Gestión del tiempo clase", text: "¿Cuál es la distribución óptima de tiempo para enseñar [TEMA] en [DURACIÓN CLASE]? Justifica.", category: "planificacion", emoji: "⏱️" },
+            { title: "Planes de recuperación", text: "Diseña un plan de recuperación para estudiantes que no alcanzaron los objetivos en [TEMA].", category: "planificacion", emoji: "🆘" },
+            { title: "Diferenciación pedagógica", text: "Propón 3 versiones diferenciadas de la actividad '[ACTIVIDAD]' para estudiantes con ritmos distintos.", category: "planificacion", emoji: "🔀" },
+            { title: "Proyecto colaborativo", text: "Diseña un proyecto colaborativo de [DURACIÓN] sobre [TEMA] que implique trabajo en equipo y exposición final.", category: "planificacion", emoji: "👥" },
+            { title: "Aprendizaje basado en problemas", text: "Crea un ABP sobre [TEMA] para [NIVEL] que implique investigación, resolución y presentación de soluciones.", category: "planificacion", emoji: "❓" },
+            { title: "Conexión con realidad", text: "¿Cómo conectar [TEMA] con problemas o situaciones reales del entorno de mis estudiantes de [NIVEL]?", category: "planificacion", emoji: "🌍" },
+            { title: "Gamificación de contenidos", text: "Convierte el aprendizaje de [TEMA] en un juego educativo con puntos, niveles y desafíos para [NIVEL].", category: "planificacion", emoji: "🎮" },
+            { title: "Taller de escritura creativa", text: "Diseña un taller de escritura creativa para que estudiantes de [NIVEL] escriban sobre [TEMA].", category: "planificacion", emoji: "✍️" },
+            { title: "Clase invertida", text: "¿Cómo implementar una clase invertida para enseñar [TEMA]? ¿Qué materiales deberían preparar estudiantes?", category: "planificacion", emoji: "🔄" },
+            { title: "Evaluación diagnóstica", text: "Crea una evaluación diagnóstica variada (preguntas, ejercicios) para medir conocimientos previos en [TEMA].", category: "planificacion", emoji: "🔬" },
+            { title: "Tutoría personalizada", text: "Propón un plan de tutoría personalizada para [ESTUDIANTE] con dificultades en [TEMA].", category: "planificacion", emoji: "👤" },
+
+            // EVALUACIÓN (20)
+            { title: "Banco de preguntas", text: "Crea un banco de 20 preguntas variadas (opción múltiple, respuesta corta, desarrollo) sobre [TEMA] para [NIVEL].", category: "evaluacion", emoji: "📝" },
+            { title: "Examen de Bloom", text: "Diseña un examen sobre [TEMA] que incluya preguntas en todos los niveles de la taxonomía de Bloom para [NIVEL].", category: "evaluacion", emoji: "🏛️" },
+            { title: "Heteroevaluación", text: "Crea una escala de heteroevaluación para que docentes evalúen desempeño en [COMPETENCIA] durante [ACTIVIDAD].", category: "evaluacion", emoji: "👁️" },
+            { title: "Autoevaluación reflexiva", text: "Propón 5 preguntas de autoevaluación reflexiva sobre [TEMA] para que estudiantes analicen su aprendizaje.", category: "evaluacion", emoji: "🪞" },
+            { title: "Coevaluación entre pares", text: "Diseña un instrumento de coevaluación para que pares evalúen la presentación/trabajo sobre [TEMA].", category: "evaluacion", emoji: "🤝" },
+            { title: "Rúbrica analítica", text: "Crea una rúbrica analítica (5 criterios x 4 niveles) para evaluar [PRODUCTO] en [NIVEL].", category: "evaluacion", emoji: "📋" },
+            { title: "Escala de valoración", text: "Diseña una escala de valoración tipo Likert para medir actitudes hacia [TEMA] en estudiantes de [NIVEL].", category: "evaluacion", emoji: "⬜" },
+            { title: "Portafolio digital", text: "¿Cómo implementar y evaluar un portafolio digital de [TEMA] en [NIVEL]? ¿Qué incluir?", category: "evaluacion", emoji: "📂" },
+            { title: "Evaluación por observación", text: "Crea una lista de cotejo para observar y evaluar [HABILIDAD] durante [ACTIVIDAD].", category: "evaluacion", emoji: "👀" },
+            { title: "Prueba de desempeño", text: "Diseña una prueba de desempeño práctico para evaluar [COMPETENCIA] en [TEMA] para [NIVEL].", category: "evaluacion", emoji: "🎬" },
+            { title: "Matriz de especificaciones", text: "Crea una matriz de especificaciones para un examen de [TEMA] que asegure validez y representatividad.", category: "evaluacion", emoji: "🔲" },
+            { title: "Prueba escrita estructurada", text: "Diseña una prueba escrita sobre [TEMA] con: 5 V/F, 5 opción múltiple, 3 respuesta corta, 2 desarrollo para [NIVEL].", category: "evaluacion", emoji: "📄" },
+            { title: "Evaluación oral", text: "Propón una estructura de evaluación oral (rubrica, preguntas, criterios) para valorar desempeño en [TEMA].", category: "evaluacion", emoji: "🎤" },
+            { title: "Análisis de error", text: "Crea una guía para analizar tipos de errores comunes que cometen estudiantes en [TEMA] y cómo retroalimentar.", category: "evaluacion", emoji: "❌" },
+            { title: "Retroalimentación efectiva", text: "¿Cómo proporcionar retroalimentación efectiva y motivadora sobre el desempeño en [ACTIVIDAD]?", category: "evaluacion", emoji: "💬" },
+            { title: "Escala de rubricas mixtas", text: "Diseña una rúbrica mixta (cuantitativa + cualitativa) para evaluar [COMPETENCIA] en [NIVEL].", category: "evaluacion", emoji: "⭐" },
+            { title: "Evaluación dinámica", text: "Crea un sistema de evaluación dinámica que permita medir el potencial de aprendizaje en [TEMA].", category: "evaluacion", emoji: "🚀" },
+            { title: "Cuestionario diagnóstico", text: "Elabora un cuestionario con 15 preguntas para diagnosticar el nivel de dominio en [TEMA] de mis estudiantes.", category: "evaluacion", emoji: "📊" },
+            { title: "Evaluación auténtica", text: "Diseña una tarea auténtica que permita evaluar competencias reales en [TEMA] fuera del aula.", category: "evaluacion", emoji: "🌐" },
+            { title: "Rúbrica para presentación", text: "Crea una rúbrica detallada para evaluar presentaciones de estudiantes sobre [TEMA] (oral + visual).", category: "evaluacion", emoji: "🎨" },
+
+            // CONTENIDO (20)
+            { title: "Resumen conceptual", text: "Elabora un resumen conceptual de [TEMA] para [NIVEL] que incluya conceptos clave, ejemplos y aplicaciones.", category: "contenido", emoji: "📖" },
+            { title: "Mapa conceptual", text: "Crea un mapa conceptual sobre [TEMA] que relacione términos clave y muestre jerarquías para [NIVEL].", category: "contenido", emoji: "🗺️" },
+            { title: "Infografía educativa", text: "Describe una infografía sobre [TEMA] para [NIVEL] que sea visualmente atractiva e informativa.", category: "contenido", emoji: "📊" },
+            { title: "Glosario interactivo", text: "Crea un glosario de 20 términos sobre [TEMA] con definiciones claras y ejemplos para [NIVEL].", category: "contenido", emoji: "📚" },
+            { title: "Cronología histórica", text: "Elabora una cronología de eventos sobre [TEMA HISTÓRICO] indicando fechas clave y su significancia.", category: "contenido", emoji: "📜" },
+            { title: "Comparativas", text: "Crea una tabla comparativa entre [CONCEPTO A] y [CONCEPTO B] para [TEMA] y [NIVEL].", category: "contenido", emoji: "⚖️" },
+            { title: "Ejemplos contextualizados", text: "Proporciona 5 ejemplos contextualizados de [TEMA] relacionados con la realidad de estudiantes de [NIVEL].", category: "contenido", emoji: "💡" },
+            { title: "Explicación simplificada", text: "Explica [TEMA COMPLEJO] de forma simple y comprensible para estudiantes de [NIVEL].", category: "contenido", emoji: "🎓" },
+            { title: "Casos prácticos", text: "Crea 3 casos prácticos sobre [TEMA] que ilustren conceptos teóricos para estudiantes de [NIVEL].", category: "contenido", emoji: "📋" },
+            { title: "Análisis de fuentes", text: "Selecciona y analiza 3 fuentes sobre [TEMA] para [NIVEL]: origen, confiabilidad, perspectiva.", category: "contenido", emoji: "🔍" },
+            { title: "Bibliografía comentada", text: "Crea una bibliografía comentada de 10 recursos sobre [TEMA] para profundizar en [NIVEL].", category: "contenido", emoji: "📕" },
+            { title: "Preguntas de comprensión", text: "Elabora 10 preguntas de comprensión progresiva sobre [TEMA] para [NIVEL].", category: "contenido", emoji: "❓" },
+            { title: "Línea de tiempo visual", text: "Describe una línea de tiempo visual sobre [EVENTO/TEMA] que muestre causa-efecto para [NIVEL].", category: "contenido", emoji: "⏳" },
+            { title: "Explicador visual", text: "Crea un explicador visual paso a paso del proceso de [TEMA] para estudiantes de [NIVEL].", category: "contenido", emoji: "👣" },
+            { title: "Síntesis integradora", text: "Elabora una síntesis integradora que conecte [TEMA] con conceptos previos de [NIVEL].", category: "contenido", emoji: "🔗" },
+            { title: "Analogía pedagógica", text: "¿Qué analogía efectiva puedo usar para explicar [TEMA COMPLEJO] a estudiantes de [NIVEL]?", category: "contenido", emoji: "🔄" },
+            { title: "Definición operacional", text: "Proporciona definiciones operacionales de términos clave en [TEMA] para [NIVEL].", category: "contenido", emoji: "📝" },
+            { title: "Explicación multilevel", text: "Explica [TEMA] en 3 niveles: sencillo, intermedio y avanzado para diferentes grupos de [NIVEL].", category: "contenido", emoji: "📈" },
+            { title: "Conexiones interdisciplinares", text: "¿Cómo conectar [TEMA] con conceptos de [OTRAS ASIGNATURAS]? Proporciona ejemplos.", category: "contenido", emoji: "🌉" },
+            { title: "Antecedentes históricos", text: "Proporciona el contexto histórico y social de [TEMA] necesario para [NIVEL].", category: "contenido", emoji: "🏛️" },
+
+            // CREATIVIDAD (20)
+            { title: "Actividad lúdica", text: "Diseña una actividad lúdica sobre [TEMA] para [NIVEL] que sea divertida pero educativa.", category: "creatividad", emoji: "🎪" },
+            { title: "Dramatización", text: "Crea un guión de dramatización sobre [TEMA] para que estudiantes de [NIVEL] representen.", category: "creatividad", emoji: "🎭" },
+            { title: "Poesía educativa", text: "Escribe un poema sobre [TEMA] para [NIVEL] que sea memorable e ilustre conceptos clave.", category: "creatividad", emoji: "✨" },
+            { title: "Canción didáctica", text: "Crea letra de canción sobre [TEMA] en [ESTILO MUSICAL] para que estudiantes de [NIVEL] la canten.", category: "creatividad", emoji: "🎵" },
+            { title: "Cuento pedagógico", text: "Escribe un cuento corto que ilustre [TEMA] para estudiantes de [NIVEL].", category: "creatividad", emoji: "📖" },
+            { title: "Diálogo educativo", text: "Escribe un diálogo entretenido entre personajes que explique [TEMA] para [NIVEL].", category: "creatividad", emoji: "💬" },
+            { title: "Acertijos educativos", text: "Crea 5 acertijos o adivinanzas sobre [TEMA] apropiados para [NIVEL].", category: "creatividad", emoji: "🔮" },
+            { title: "Meme educativo", text: "¿Cómo crear un meme sobre [TEMA] que sea divertido pero educativamente correcto para [NIVEL]?", category: "creatividad", emoji: "😄" },
+            { title: "Juego de rol", text: "Diseña un juego de rol sobre [TEMA] para [NIVEL] donde estudiantes asuman roles y tomen decisiones.", category: "creatividad", emoji: "🎲" },
+            { title: "Cómic educativo", text: "Describe viñetas de un cómic educativo sobre [TEMA] para estudiantes de [NIVEL].", category: "creatividad", emoji: "💭" },
+            { title: "Debate temático", text: "Propón 3 posturas de debate sobre [TEMA CONTROVERTIDO] para [NIVEL] con argumentos.", category: "creatividad", emoji: "🗣️" },
+            { title: "Inventar historias", text: "Propón una estrategia donde estudiantes creen historias que ilustren [TEMA] para [NIVEL].", category: "creatividad", emoji: "📚" },
+            { title: "Pasatiempos educativos", text: "Diseña un crucigrama, sopa de letras y sudoku educativo sobre [TEMA] para [NIVEL].", category: "creatividad", emoji: "🧩" },
+            { title: "Expresión artística", text: "Propón una actividad de expresión artística (pintura, escultura, collage) sobre [TEMA] para [NIVEL].", category: "creatividad", emoji: "🎨" },
+            { title: "Experimento casero", text: "Diseña un experimento casero simple sobre [TEMA] que estudiantes de [NIVEL] puedan hacer.", category: "creatividad", emoji: "⚗️" },
+            { title: "Presentación creativa", text: "¿Qué formatos creativos puedo usar para presentar [TEMA] en lugar de la presentación tradicional?", category: "creatividad", emoji: "🎬" },
+            { title: "Story telling", text: "Crea una estrategia de storytelling que conecte [TEMA] con emociones y experiencias de [NIVEL].", category: "creatividad", emoji: "📖" },
+            { title: "Video script", text: "Escribe un guión de video educativo sobre [TEMA] de 5-10 minutos para estudiantes de [NIVEL].", category: "creatividad", emoji: "📹" },
+            { title: "Podcast educativo", text: "Propón contenido y estructura para un podcast sobre [TEMA] dirigido a estudiantes de [NIVEL].", category: "creatividad", emoji: "🎙️" },
+            { title: "WebQuest", text: "Diseña una WebQuest sobre [TEMA] donde estudiantes de [NIVEL] investiguen usando recursos online.", category: "creatividad", emoji: "🌐" },
+
+            // TIC & RECURSOS (10)
+            { title: "Herramientas digitales", text: "¿Qué herramientas digitales (apps, plataformas, software) puedo usar para enseñar [TEMA] a [NIVEL]?", category: "tic", emoji: "💻" },
+            { title: "Aula virtual", text: "¿Cómo estructurar un curso sobre [TEMA] en [PLATAFORMA LMS] para [NIVEL]?", category: "tic", emoji: "🖥️" },
+            { title: "Materiales descargables", text: "Proporciona una lista de 10 recursos descargables (worksheets, templates) sobre [TEMA] para [NIVEL].", category: "tic", emoji: "📥" },
+            { title: "Videos educativos", text: "Sugiere 5 videos educativos de calidad sobre [TEMA] apropiados para [NIVEL].", category: "tic", emoji: "▶️" },
+            { title: "Plataformas gamificadas", text: "¿Cómo usar plataformas gamificadas (Kahoot, Duolingo) para reforzar [TEMA] en [NIVEL]?", category: "tic", emoji: "🎮" },
+            { title: "Recursos interactivos", text: "¿Qué recursos interactivos online puedo usar para enseñar [TEMA] a [NIVEL]? (simuladores, applets, etc.)", category: "tic", emoji: "⚙️" },
+            { title: "Repositorios educativos", text: "Sugiere repositorios y bancos de recursos digitales sobre [TEMA] para [NIVEL].", category: "tic", emoji: "📦" },
+            { title: "Crear contenido multimedia", text: "¿Cómo crear contenido multimedia (imágenes, videos, infografías) sobre [TEMA] con herramientas libres?", category: "tic", emoji: "🎥" },
+            { title: "Evaluación online", text: "¿Cómo implementar evaluaciones online sobre [TEMA] en [NIVEL] usando [HERRAMIENTA]?", category: "tic", emoji: "✔️" },
+            { title: "Recursos accesibles", text: "¿Cómo adaptar [TEMA] para estudiantes con [DISCAPACIDAD] usando tecnología accesible?", category: "tic", emoji: "♿" },
+
+            // MOTIVACIÓN (10)
+            { title: "Motivación inicial", text: "Propón 3 estrategias para captar la atención e interés inicial en [TEMA] para estudiantes de [NIVEL].", category: "motivacion", emoji: "⚡" },
+            { title: "Frases inspiradoras", text: "¿Qué frases o mensajes inspiradores puedo usar para motivar a estudiantes en [TEMA] en [NIVEL]?", category: "motivacion", emoji: "💪" },
+            { title: "Relevancia del tema", text: "¿Cómo demostrar la relevancia de [TEMA] en la vida futura de estudiantes de [NIVEL]?", category: "motivacion", emoji: "🎯" },
+            { title: "Celebrar logros", text: "¿Cómo celebrar y reconocer logros de estudiantes en [TEMA]? Propuesta de estrategias.", category: "motivacion", emoji: "🏆" },
+            { title: "Mentoría positiva", text: "¿Cómo ser mentor positivo para estudiantes desmotivados en [TEMA]? Estrategias de relación.", category: "motivacion", emoji: "👥" },
+            { title: "Ambiente inclusivo", text: "¿Cómo crear un ambiente de clase inclusivo donde todos se sientan motivados a participar en [TEMA]?", category: "motivacion", emoji: "🤗" },
+            { title: "Desafíos progresivos", text: "¿Cómo estructurar [TEMA] con desafíos progresivos que mantengan motivados a [NIVEL]?", category: "motivacion", emoji: "📈" },
+            { title: "Autonomía estudiantil", text: "¿Cómo fomentar la autonomía y responsabilidad de estudiantes en [TEMA] para [NIVEL]?", category: "motivacion", emoji: "🦅" },
+            { title: "Conexión emocional", text: "¿Cómo conectar emocionalmente a estudiantes de [NIVEL] con [TEMA]?", category: "motivacion", emoji: "❤️" },
+            { title: "Recuperación emocional", text: "¿Cómo ayudar a estudiantes que se sienten fracasados en [TEMA]? Estrategias de apoyo.", category: "motivacion", emoji: "🌱" }
+        ];
+
+        let filteredPrompts = [...prompts];
+        let currentCategory = 'todos';
+
+        // DOM
+        const searchInput = document.getElementById('searchInput');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const promptsGrid = document.getElementById('promptsGrid');
+        const statsText = document.getElementById('statsText');
+
+        // FUNCIONES
+        function renderPrompts() {
+            promptsGrid.innerHTML = '';
+            if (filteredPrompts.length === 0) {
+                promptsGrid.innerHTML = `
+                    <div style="grid-column: 1/-1;">
+                        <div class="no-results">
+                            <div class="no-results-emoji">🔍</div>
+                            <p>No encontramos prompts con esos criterios.</p>
+                            <p style="font-size: 0.9rem; color: #bbb; margin-top: 10px;">Intenta con otras palabras clave o categorías</p>
+                        </div>
+                    </div>
+                `;
+                updateStats();
+                return;
+            }
+
+            filteredPrompts.forEach((prompt, index) => {
+                const card = document.createElement('div');
+                card.className = 'prompt-card';
+                card.innerHTML = `
+                    <div class="prompt-header">
+                        <div class="prompt-emoji">${prompt.emoji}</div>
+                        <h3 class="prompt-title">${prompt.title}</h3>
+                    </div>
+                    <span class="category-badge">${prompt.category.charAt(0).toUpperCase() + prompt.category.slice(1)}</span>
+                    <div class="prompt-text">${prompt.text}</div>
+                    <button class="copy-btn" data-index="${index}">
+                        📋 Copiar prompt
+                    </button>
+                `;
+                promptsGrid.appendChild(card);
+                
+                // Agregar event listener al botón
+                card.querySelector('.copy-btn').addEventListener('click', function() {
+                    copyPrompt(prompt.text, this);
+                });
+            });
+            updateStats();
+        }
+
+        function filterPrompts() {
+            const searchTerm = searchInput.value.toLowerCase();
+            filteredPrompts = prompts.filter(prompt => {
+                const matchesSearch = prompt.title.toLowerCase().includes(searchTerm) ||
+                                    prompt.text.toLowerCase().includes(searchTerm) ||
+                                    prompt.category.toLowerCase().includes(searchTerm);
+                const matchesCategory = currentCategory === 'todos' || prompt.category === currentCategory;
+                return matchesSearch && matchesCategory;
+            });
+            renderPrompts();
+        }
+
+        function updateStats() {
+            statsText.textContent = `Mostrando ${filteredPrompts.length} prompts de ${prompts.length} disponibles`;
+        }
+
+        function copyPrompt(text, button) {
+            // Usar la API de Clipboard con manejo de errores
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    // Cambiar apariencia del botón
+                    const originalText = button.innerHTML;
+                    button.innerHTML = '✅ ¡Copiado!';
+                    button.classList.add('copied');
+                    
+                    // Volver al estado original después de 2 segundos
+                    setTimeout(() => {
+                        button.innerHTML = '📋 Copiar prompt';
+                        button.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.log('Error al copiar:', err);
+                    // Fallback si falla
+                    fallbackCopy(text, button);
+                });
+            } else {
+                // Usar método fallback si Clipboard API no está disponible
+                fallbackCopy(text, button);
+            }
+        }
+
+        function fallbackCopy(text, button) {
+            // Crear un textarea temporal
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            
+            try {
+                textarea.select();
+                document.execCommand('copy');
+                
+                // Cambiar apariencia del botón
+                button.innerHTML = '✅ ¡Copiado!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.innerHTML = '📋 Copiar prompt';
+                    button.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                console.log('Fallback copy failed:', err);
+                button.innerHTML = '❌ Error al copiar';
+                setTimeout(() => {
+                    button.innerHTML = '📋 Copiar prompt';
+                }, 2000);
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        }
+
+        // EVENT LISTENERS
+        searchInput.addEventListener('input', filterPrompts);
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentCategory = btn.dataset.category;
+                filterPrompts();
+            });
+        });
+
+        // INICIAL
+        renderPrompts();
+
+        // PERSONAJE FLOTANTE CON SCROLL
+        const floatingCharacter = document.getElementById('floatingCharacter');
+        const characterBubble = document.querySelector('.character-bubble');
+
+        // Mostrar personaje desde el inicio
+        floatingCharacter.classList.remove('hidden');
+        floatingCharacter.classList.add('visible');
+
+        window.addEventListener('scroll', () => {
+            // Cambiar el emoji según el scroll
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPercent = (window.scrollY / maxScroll) * 100;
+
+            let emoji = '🧠'; // Default
+
+            if (scrollPercent < 25) {
+                emoji = '🎓'; // Planificación
+            } else if (scrollPercent < 40) {
+                emoji = '📊'; // Evaluación
+            } else if (scrollPercent < 55) {
+                emoji = '📖'; // Contenido
+            } else if (scrollPercent < 70) {
+                emoji = '🎨'; // Creatividad
+            } else if (scrollPercent < 85) {
+                emoji = '💻'; // TIC
+            } else {
+                emoji = '💪'; // Motivación
+            }
+
+            characterBubble.textContent = emoji;
+        });
+    </script>
+</body>
+</html>
